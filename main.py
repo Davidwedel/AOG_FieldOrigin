@@ -63,6 +63,17 @@ def main():
     print(f"Difference in Easting : {easting_diff} meters")
     print(f"Difference in Northing : {northing_diff} meters")
 
+
+    #set the StartFix in the Field.txt to the new StartFix
+
+    lines[8] = f"{lat_new},{lon_new}\n"
+    
+    print(f"Changed StartFix to: {lines[8]}")
+
+    with open(os.path.join(field_path, field_name, "Field.txt"), "w") as field:
+        field.writelines(lines)
+
 if __name__ == "__main__":
     main()
+
 
