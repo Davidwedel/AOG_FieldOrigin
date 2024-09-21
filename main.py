@@ -30,7 +30,7 @@ def main():
 
     shutil.copytree(source_field, destination_dir) #create a copy of the original field
     
-    with open(os.path.join(field_path, field_name, "Field.txt"), "r") as field:
+    with open(os.path.join(destination_path, field_name, "Field.txt"), "r") as field:
         #read all lines from the file
         lines = field.readlines()
 
@@ -70,7 +70,7 @@ def main():
     
     print(f"Changed StartFix to: {lines[8]}")
 
-    with open(os.path.join(field_path, field_name, "Field.txt"), "w") as field:
+    with open(os.path.join(destination_path, field_name, "Field.txt"), "w") as field:
         field.writelines(lines)
 
 if __name__ == "__main__":
