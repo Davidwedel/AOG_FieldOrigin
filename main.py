@@ -73,6 +73,57 @@ def main():
     with open(os.path.join(destination_path, field_name, "Field.txt"), "w") as field:
         field.writelines(lines)
 
+    print("Done with Field.txt")
+    
+    #starting with Boundary.txt
+
+    #$Boundary
+    #False
+    #824                        number of points
+    #-631.348,118.125,3.14613   easting, northing, heading
+
+    with open(os.path.join(destination_path, field_name, "Boundary.txt"), "r") as boundary:
+        #read all lines from the file
+        lines = boundary.readlines()
+
+        updated_lines = []
+        i = 0
+
+        while i < len(lines[i]):
+            
+            #copy the current line
+            updated_lines.append(lines[i])
+            print(lines[i])
+
+             # Check if the line is a count line (it should be an integer)
+            try:
+                count = int(lines[i + 1].strip())
+                print("countline:", count)
+            except ValueError:
+                print("Not a count line. Skipping.")
+                count = 0 
+
+            for j in range(count):
+                if i + 1 + j < len(lines):  # Ensure we don't go out of bounds
+                    values = lines[i + 2 + j].strip().split(',')
+                    # Convert the first two values to float and add the offsets
+                    northing = float(values[0]) + northing_diff
+                    easting = float(values[1]) + easting_diff
+                    third_value = values[2]
+                    # Create the updated line
+                    updated_line = f"{northing:.3f},{easting:.3f},{third_value}\n"
+                    updated_lines.append(updated_line)                
+
+            #move to the next section
+            i += count + 2
+        
+    # Write the updated lines back to the file
+    with open(os.path.join(destination_path, field_name, "Boundary.txt"), 'w') as file:
+        file.writelines(updated_lines)
+
+    print("Done with Boundary.txt")        
+
+
 if __name__ == "__main__":
     main()
 
