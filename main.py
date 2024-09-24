@@ -14,9 +14,13 @@ def lat_lon_to_utm(lat, lon):
 
 def main():
 
+
+    northing_diff = 1 #TEST here we can set how far to jump. If this
+    easting_diff = 1 #is set at 0, then it is calculated off of the StartFix and new lat/lon
+
     field_path = "/home/davidwedel/Documents/QtAgOpenGPS/Fields"
 
-    field_name = "Hills South"
+    field_name = "TestField"
 
     source_field = os.path.join(field_path, field_name)
 
@@ -57,8 +61,12 @@ def main():
     easting_new, northing_new = lat_lon_to_utm(lat_new, lon_new)
 
     # Calculate differences
-    easting_diff = float(easting_old - easting_new)
-    northing_diff = float(northing_old - northing_new)
+    if (easting_diff == 0) and (northing_diff == 0): #set easting diff and northing diff
+        #to a custom value if you want to test
+        easting_diff = float(easting_old - easting_new)
+        northing_diff = float(northing_old - northing_new)
+    else:
+        print("Custom easting and northing values detected. Skipping calculation.")
 
     print(f"Difference in Easting : {easting_diff} meters")
     print(f"Difference in Northing : {northing_diff} meters")
@@ -89,33 +97,50 @@ def main():
         updated_lines = []
         i = 0
 
-        while i < len(lines[i]):
+        while i < len(lines):
             
             #copy the current line
-            updated_lines.append(lines[i])
+            print("current line:", i + 1)
             print(lines[i])
 
-             # Check if the line is a count line (it should be an integer)
+             # Check if the current line is a count line (it should be an integer)
             try:
-                count = int(lines[i + 1].strip())
+                count = int(lines[i+1].strip()) # it is a count line. the for should take us to the end of the section
+                updated_lines.append(lines[i])
+
                 print("countline:", count)
-            except ValueError:
-                print("Not a count line. Skipping.")
+                i += 1 #move down a line
+                print()
+                for j in range(count):
+                    print(range(count)) 
+                    print("j:", j)
+                    #if i + j < len(lines):  # Ensure we don't go out of bounds
+                    if (True):
+                        print("Processing line:", i + j + 1)
+                        values = lines[i + j].strip().split(',')
+                        # Convert the first two values to float and add the offsets
+                        northing = float(values[0]) + northing_diff
+                        easting = float(values[1]) + easting_diff
+                        third_value = values[2]
+
+                        # Create the updated line
+                        print("Old line:", values)
+                        updated_line = f"{northing:.3f},{easting:.3f},{third_value}\n"
+                        print("updated_line:", updated_line)
+                        updated_lines.append(updated_line)                
+                    else:
+                        print("else")
+                print("out of for")        
+                i += count    
+
+
+            except (ValueError, IndexError): # it is not a count line, copy to file, and continue
                 count = 0 
+                print("not a count line")
+                updated_lines.append(lines[i])
+                
+                i +=1 #move down a line
 
-            for j in range(count):
-                if i + 1 + j < len(lines):  # Ensure we don't go out of bounds
-                    values = lines[i + 2 + j].strip().split(',')
-                    # Convert the first two values to float and add the offsets
-                    northing = float(values[0]) + northing_diff
-                    easting = float(values[1]) + easting_diff
-                    third_value = values[2]
-                    # Create the updated line
-                    updated_line = f"{northing:.3f},{easting:.3f},{third_value}\n"
-                    updated_lines.append(updated_line)                
-
-            #move to the next section
-            i += count + 2
         
     # Write the updated lines back to the file
     with open(os.path.join(destination_path, field_name, "Boundary.txt"), 'w') as file:
